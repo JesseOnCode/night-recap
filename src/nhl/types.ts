@@ -9,3 +9,14 @@ export type ScoreResponse = {
   prevDate: string;
   games: ScoreGame[];
 };
+
+export type RosterPlayer = {
+  id: number;
+  birthCountry: string;
+};
+
+export type BoxscorePlayer = {
+  playerId: number;
+  position: string;
+  toi: string;
+};
