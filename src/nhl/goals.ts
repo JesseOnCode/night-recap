@@ -21,12 +21,39 @@ export type GoalClip = {
   pageUrl: string | null;
 };
 
-export function finnishVideoPage(url: string): string {
-  if (url.includes("/fi/video/")) {
-    return url;
+const videoHosts = new Set(["nhl.com", "www.nhl.com"]);
+
+export function finnishVideoPage(url: string): string | null {
+  let parsed: URL;
+
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
   }
 
-  return url.replace("/video/", "/fi/video/");
+  if (
+    parsed.protocol !== "https:" ||
+    !videoHosts.has(parsed.hostname) ||
+    parsed.username ||
+    parsed.password
+  ) {
+    return null;
+  }
+
+  if (!parsed.pathname.includes("/fi/video/")) {
+    parsed.pathname = parsed.pathname.replace("/video/", "/fi/video/");
+  }
+
+  return parsed.toString();
+}
+
+function videoUrlFor(clip: number | null): string | null {
+  if (typeof clip !== "number" || !Number.isInteger(clip) || clip < 0) {
+    return null;
+  }
+
+  return `${playerBase}${clip}`;
 }
 
 function clip(
@@ -34,17 +61,17 @@ function clip(
   playerId: number,
   kind: GoalClip["kind"],
 ): GoalClip {
+  const videoUrl = videoUrlFor(goal.highlightClip);
+
   return {
     playerId,
     scorerId: goal.scorerId,
     kind,
     period: goal.period,
     time: goal.time,
-    videoId: goal.highlightClip,
-    videoUrl:
-      goal.highlightClip === null ? null : playerBase + goal.highlightClip,
-    pageUrl:
-      goal.sharingUrl === null ? null : finnishVideoPage(goal.sharingUrl),
+    videoId: videoUrl === null ? null : goal.highlightClip,
+    videoUrl,
+    pageUrl: goal.sharingUrl === null ? null : finnishVideoPage(goal.sharingUrl),
   };
 }
 

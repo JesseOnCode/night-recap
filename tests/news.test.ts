@@ -55,4 +55,11 @@ describe("story links", () => {
       "https://www.nhl.com/fi/news/2026-27-player-profile-miro-heiskanen",
     );
   });
+
+  it("hylkää kuvan ja jutun, joiden osoite ei ole NHL:n", () => {
+    expect(storyImage("https://example.com/{formatInstructions}/kuva")).toBeNull();
+    expect(storyImage("javascript:alert(1)")).toBeNull();
+    expect(storyPage("../admin")).toBeNull();
+    expect(storyPage("javascript:alert(1)")).toBeNull();
+  });
 });

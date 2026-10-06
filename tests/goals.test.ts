@@ -42,6 +42,35 @@ describe("finnishHighlights", () => {
     expect(clips[1].pageUrl).toBe("https://nhl.com/fi/video/rantanen");
   });
 
+  it("hylkää videolinkin, joka ei ole NHL:n osoite", () => {
+    const clips = finnishHighlights(
+      [10],
+      [
+        {
+          scorerId: 10,
+          assistIds: [],
+          period: 1,
+          time: "01:00",
+          highlightClip: 5,
+          sharingUrl: "javascript:alert(1)",
+        },
+        {
+          scorerId: 10,
+          assistIds: [],
+          period: 2,
+          time: "02:00",
+          highlightClip: 6,
+          sharingUrl: "https://example.com/video/muu",
+        },
+      ],
+    );
+
+    expect(clips.map((clip) => clip.pageUrl)).toEqual([null, null]);
+    expect(clips[0].videoUrl).toBe(
+      "https://players.brightcove.net/6415718365001/default_default/index.html?videoId=5",
+    );
+  });
+
   it("näyttää suomalaisen syötön samasta koosteesta", () => {
     const clips = finnishHighlights(
       [10, 24],

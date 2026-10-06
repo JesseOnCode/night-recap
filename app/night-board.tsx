@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState, type CSSProperties } from "react";
+import { apiPath } from "@/src/base-path";
 import type { TableRow } from "@/src/nhl/stats";
 import { columnValue, nextSort, sortByColumn, type SortState } from "@/src/nhl/sort-table";
 import { ColumnLegend } from "./column-legend";
@@ -402,7 +403,7 @@ export function NightBoard({ initial }: { initial: NightResponse }) {
 
     async function load() {
       try {
-        const response = await fetch("api/night");
+        const response = await fetch(apiPath("api/night"));
         const body = (await response.json()) as NightResponse & { message?: string };
 
         if (cancelled) {

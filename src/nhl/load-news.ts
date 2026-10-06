@@ -51,16 +51,27 @@ async function cardsFor(player: Finn): Promise<NewsCard[]> {
     .filter((story): story is StoryHit => story !== null)
     .filter((story) => relevantStory(story, player.playerId, player.lastName))
     .filter((story) => withinDays(story.contentDate, new Date(), 14))
-    .map((story) => ({
-      slug: story.slug,
-      headline: story.headline,
-      summary: story.summary,
-      published: story.contentDate,
-      imageUrl: storyImage(story.templateUrl),
-      pageUrl: storyPage(story.slug),
-      player: player.name,
-      team: player.team,
-    }));
+    .flatMap((story) => {
+      const imageUrl = storyImage(story.templateUrl);
+      const pageUrl = storyPage(story.slug);
+
+      if (!imageUrl || !pageUrl) {
+        return [];
+      }
+
+      return [
+        {
+          slug: story.slug,
+          headline: story.headline,
+          summary: story.summary,
+          published: story.contentDate,
+          imageUrl,
+          pageUrl,
+          player: player.name,
+          team: player.team,
+        },
+      ];
+    });
 }
 
 export async function loadNews(): Promise<NewsCard[]> {

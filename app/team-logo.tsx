@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiPath } from "@/src/base-path";
 
 const logos = new Map<string, Promise<string>>();
 
@@ -12,7 +13,7 @@ function loadLogo(team: string, variant: "dark" | "light"): Promise<string> {
     return cached;
   }
 
-  const pending = fetch(`api/logo?team=${team}&variant=${variant}&v=4`)
+  const pending = fetch(apiPath(`api/logo?team=${encodeURIComponent(team)}&variant=${variant}&v=4`))
     .then(async (response) => {
       if (!response.ok) {
         throw new Error(key);

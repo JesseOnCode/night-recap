@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
   const svg = cropLogo(await response.text());
 
-  if (!svg.trimStart().startsWith("<svg") || /<script|foreignObject/i.test(svg)) {
+  if (!svg.trimStart().startsWith("<svg") || /<script|foreignObject|javascript:|\son\w+\s*=/i.test(svg)) {
     return new Response(null, { status: 502 });
   }
 
