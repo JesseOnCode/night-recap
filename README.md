@@ -26,7 +26,7 @@ NHL:n rajapinta ei salli hakuja suoraan selaimesta, joten haut tehdään palveli
 
 Palvelin pitää tuloksia välimuistissa, jotta NHL:ää ei kuormiteta jokaisella sivunlatauksella. Päättyneen kierroksen tiedot säilyvät, kunnes uusi kierros alkaa. Käynnissä olevan kierroksen tiedot haetaan uudelleen 20 sekunnin välein. Jos haku epäonnistuu tai NHL palauttaa liikaa pyyntöjä, haku yritetään uudelleen lyhyen tauon jälkeen.
 
-Sivu julkaistaan alipolussa `/projektit/suomalaiset-nhl`. Polku on Next.jsin `basePath`, joten sama osoite toimii paikallisesti ja Polar55:ssä. Selaimen haut `api/night` ja `api/logo` käyttävät tätä polkua.
+Sivu julkaistaan alipolussa `/projektit/night-recap`. Polku on Next.jsin `basePath`, joten sama osoite toimii paikallisesti ja Polar55:ssä. Selaimen haut `api/night` ja `api/logo` käyttävät tätä polkua.
 
 Videolinkki, uutislinkki ja uutiskuva hyväksytään vain, jos osoite on HTTPS ja palvelin on NHL:n (`nhl.com`, `www.nhl.com` tai `media.d3.nhle.com`). Muu osoite jätetään näyttämättä. Logoksi kelpaa vain SVG, jossa ei ole skriptiä. Vastauksiin lisätään otsikot `X-Content-Type-Options`, `X-Frame-Options` ja `Referrer-Policy`.
 
@@ -39,7 +39,7 @@ npm install
 npm run dev
 ```
 
-Sivu aukeaa osoitteeseen http://localhost:3000/projektit/suomalaiset-nhl.
+Sivu aukeaa osoitteeseen http://localhost:3000/projektit/night-recap.
 
 Tuotantoversio:
 
@@ -68,7 +68,7 @@ app/
   api/logo/           joukkueiden logot
 next.config.ts        julkaisupolku ja turvaotsikot
 src/
-  base-path.ts        polku /projektit/suomalaiset-nhl
+  base-path.ts        polku /projektit/night-recap
   nhl/
     client.ts         NHL-haut, uudelleenyritys ja välimuisti
     load-night.ts     yön koosteen kokoaminen
