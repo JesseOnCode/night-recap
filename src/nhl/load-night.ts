@@ -129,7 +129,7 @@ const liveTtlMs = 20_000;
 const cacheFile = path.join(process.cwd(), ".cache", "night.json");
 
 let memory: { at: number; version: number; page: NightPage } | null = null;
-let diskRead: Promise<{ at: number; page: NightPage } | null> | null = null;
+let diskRead: Promise<{ at: number; version: number; page: NightPage } | null> | null = null;
 let pending: Promise<NightPage> | null = null;
 
 function wait(ms: number): Promise<void> {
