@@ -64,16 +64,48 @@ type RosterEntry = RosterPlayer & {
   lastName?: Named;
 };
 
-async function nhl<T>(path: string): Promise<T> {
-  const response = await fetch(`https://api-web.nhle.com${path}`, {
-    cache: "no-store",
-  });
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-  if (!response.ok) {
-    throw new Error(path);
+async function nhl<T>(path: string): Promise<T> {
+  let url = path.startsWith("http") ? path : `https://api-web.nhle.com${path}`;
+
+  for (let attempt = 0; attempt < 4; attempt++) {
+    let response = await fetch(url, {
+      cache: "no-store",
+      redirect: "manual",
+    });
+
+    for (
+      let hop = 0;
+      hop < 3 && response.status >= 300 && response.status < 400;
+      hop++
+    ) {
+      const location = response.headers.get("location");
+      if (!location) {
+        throw new Error(path);
+      }
+      url = new URL(location, url).href;
+      response = await fetch(url, {
+        cache: "no-store",
+        redirect: "manual",
+      });
+    }
+
+    if (response.status === 429 || response.status >= 500) {
+      await wait(700 * (attempt + 1));
+      continue;
+    }
+
+    if (!response.ok) {
+      throw new Error(`${path} ${response.status}`);
+    }
+
+    return response.json() as Promise<T>;
   }
 
-  return response.json() as Promise<T>;
+  throw new Error(path);
 }
 
 function text(value: Named | undefined): string {
@@ -254,7 +286,8 @@ export async function GET() {
       players: buildTableRows(nightPlayers),
       goals,
     });
-  } catch {
+  } catch (error) {
+    console.error(error);
     return Response.json(
       { message: "NHL-tietoja ei saatu haettua." },
       { status: 502 },

@@ -84,7 +84,7 @@ export function buildTableRows(players: NightPlayer[]): TableRow[] {
     return a.lastName.localeCompare(b.lastName, "fi");
   });
 
-  return sorted.map((player) => {
+  return sorted.map((player): TableRow => {
     const goalie = player.position === "G";
 
     return {
