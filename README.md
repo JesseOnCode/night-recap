@@ -12,6 +12,8 @@ Night Recap kokoaa yhdelle sivulle NHL:ssä viime yönä pelanneet suomalaiset. 
 
 Taulukot voi järjestää mistä tahansa sarakkeesta painamalla otsikkoa. Lyhenteiden selitykset ovat taulukon alla.
 
+Kapealla näytöllä taulukot muuttuvat korteiksi. Jokaisen numeron yläpuolella on sen lyhenne, ja järjestäminen on napurivinä taulukon yläpuolella.
+
 ## Tekniikka
 
 - Next.js 16 (App Router), React 19 ja TypeScript
@@ -24,6 +26,10 @@ NHL:n rajapinta ei salli hakuja suoraan selaimesta, joten haut tehdään palveli
 
 Palvelin pitää tuloksia välimuistissa, jotta NHL:ää ei kuormiteta jokaisella sivunlatauksella. Päättyneen kierroksen tiedot säilyvät, kunnes uusi kierros alkaa. Käynnissä olevan kierroksen tiedot haetaan uudelleen 20 sekunnin välein. Jos haku epäonnistuu tai NHL palauttaa liikaa pyyntöjä, haku yritetään uudelleen lyhyen tauon jälkeen.
 
+Sivu julkaistaan alipolussa `/projektit/suomalaiset-nhl`. Polku on Next.jsin `basePath`, joten sama osoite toimii paikallisesti ja Polar55:ssä. Selaimen haut `api/night` ja `api/logo` käyttävät tätä polkua.
+
+Videolinkki, uutislinkki ja uutiskuva hyväksytään vain, jos osoite on HTTPS ja palvelin on NHL:n (`nhl.com`, `www.nhl.com` tai `media.d3.nhle.com`). Muu osoite jätetään näyttämättä. Logoksi kelpaa vain SVG, jossa ei ole skriptiä. Vastauksiin lisätään otsikot `X-Content-Type-Options`, `X-Frame-Options` ja `Referrer-Policy`.
+
 ## Käynnistys
 
 Tarvitset Node.js 20:n tai uudemman.
@@ -33,7 +39,7 @@ npm install
 npm run dev
 ```
 
-Sivu aukeaa osoitteeseen http://localhost:3000.
+Sivu aukeaa osoitteeseen http://localhost:3000/projektit/suomalaiset-nhl.
 
 Tuotantoversio:
 
@@ -48,7 +54,7 @@ npm start
 npm test
 ```
 
-Testit käyttävät tallennettua esimerkkidataa, eivätkä ne tee hakuja NHL:ään. Ne kattavat kierroksen valinnan, suomalaisten tunnistamisen, taulukkorivien muotoilun, maalien ja syöttöjen videot, välimuistin, kauden tilastot, uutisten suodatuksen, logojen rajauksen ja taulukon järjestämisen.
+Testit käyttävät tallennettua esimerkkidataa, eivätkä ne tee hakuja NHL:ään. Ne kattavat kierroksen valinnan, suomalaisten tunnistamisen, taulukkorivien muotoilun, maalien ja syöttöjen videot, välimuistin, kauden tilastot, uutisten suodatuksen, logojen rajauksen, taulukon järjestämisen ja sen, että NHL:n ulkopuoliset osoitteet hylätään.
 
 ## Rakenne
 
@@ -60,16 +66,19 @@ app/
   uutiset/            uutiset
   api/night/          yön tiedot sivulle
   api/logo/           joukkueiden logot
-src/nhl/
-  client.ts           NHL-haut, uudelleenyritys ja välimuisti
-  load-night.ts       yön koosteen kokoaminen
-  slate.ts            näytettävän kierroksen valinta
-  finns.ts            pelanneiden suomalaisten tunnistus
-  stats.ts            taulukkorivit
-  goals.ts            maalien ja syöttöjen videot
-  load-season.ts      kauden tilastot
-  load-news.ts        uutiset
-  sort-table.ts       taulukon järjestäminen
+next.config.ts        julkaisupolku ja turvaotsikot
+src/
+  base-path.ts        polku /projektit/suomalaiset-nhl
+  nhl/
+    client.ts         NHL-haut, uudelleenyritys ja välimuisti
+    load-night.ts     yön koosteen kokoaminen
+    slate.ts          näytettävän kierroksen valinta
+    finns.ts          pelanneiden suomalaisten tunnistus
+    stats.ts          taulukkorivit
+    goals.ts          maalien ja syöttöjen videot
+    load-season.ts    kauden tilastot
+    load-news.ts      uutiset
+    sort-table.ts     taulukon järjestäminen
 tests/                yksikkötestit
 ```
 
