@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Night Recap
 
-## Getting Started
+Night Recap kokoaa yhdelle sivulle NHL:ssä viime yönä pelanneet suomalaiset. Sivulla ovat pelaajien ottelutilastot, maalien ja syöttöjen videot, lopputulokset, kauden tilastot ja suomenkieliset uutiset.
 
-First, run the development server:
+## Sivut
+
+**Viime yö** näyttää kierroksen, jonka NHL:n rajapinta ilmoittaa viimeisimmäksi. Mukana ovat kaikki suomalaiset, joilla on jääaikaa, myös ilman pisteitä. Kenttäpelaajat ja maalivahdit ovat omissa taulukoissaan. Pelaajan nimeä painamalla aukeavat hänen maaliensa ja syöttöjensä videot. Oikealla ovat niiden otteluiden lopputulokset, joissa suomalaisia pelasi. Kun otteluita on käynnissä, sivu päivittyy 20 sekunnin välein.
+
+**Uutiset** listaa NHL.comin suomenkieliset jutut, joissa suomalaispelaaja on mainittu. Uusimmat otsikot kiertävät myös jokaisen sivun yläreunassa.
+
+**Tilastot** näyttää suomalaisten kauden luvut kenttäpelaajille ja maalivahdeille.
+
+Taulukot voi järjestää mistä tahansa sarakkeesta painamalla otsikkoa. Lyhenteiden selitykset ovat taulukon alla.
+
+## Tekniikka
+
+- Next.js 16 (App Router), React 19 ja TypeScript
+- Vitest yksikkötesteihin
+- ESLint
+
+Tiedot tulevat NHL:n julkisesta rajapinnasta `api-web.nhle.com`. Uutiset haetaan NHL:n sisältörajapinnasta suomenkielisinä.
+
+NHL:n rajapinta ei salli hakuja suoraan selaimesta, joten haut tehdään palvelimella. Sivu kysyy omalta reitiltään `api/night`, ja palvelin kokoaa vastauksen NHL:n tulospalvelusta, sarjataulukosta, kokoonpanoista ja otteluiden boxscoreista. Suomalaiset tunnistetaan kokoonpanon syntymämaasta.
+
+Palvelin pitää tuloksia välimuistissa, jotta NHL:ää ei kuormiteta jokaisella sivunlatauksella. Päättyneen kierroksen tiedot säilyvät, kunnes uusi kierros alkaa. Käynnissä olevan kierroksen tiedot haetaan uudelleen 20 sekunnin välein. Jos haku epäonnistuu tai NHL palauttaa liikaa pyyntöjä, haku yritetään uudelleen lyhyen tauon jälkeen.
+
+## Käynnistys
+
+Tarvitset Node.js 20:n tai uudemman.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sivu aukeaa osoitteeseen http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Tuotantoversio:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Testit
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Testit käyttävät tallennettua esimerkkidataa, eivätkä ne tee hakuja NHL:ään. Ne kattavat kierroksen valinnan, suomalaisten tunnistamisen, taulukkorivien muotoilun, maalien ja syöttöjen videot, välimuistin, kauden tilastot, uutisten suodatuksen, logojen rajauksen ja taulukon järjestämisen.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Rakenne
 
-## Deploy on Vercel
+```
+app/
+  page.tsx            Viime yö
+  night-board.tsx     yön taulukot, videot ja lopputulokset
+  tilastot/           kauden tilastot
+  uutiset/            uutiset
+  api/night/          yön tiedot sivulle
+  api/logo/           joukkueiden logot
+src/nhl/
+  client.ts           NHL-haut, uudelleenyritys ja välimuisti
+  load-night.ts       yön koosteen kokoaminen
+  slate.ts            näytettävän kierroksen valinta
+  finns.ts            pelanneiden suomalaisten tunnistus
+  stats.ts            taulukkorivit
+  goals.ts            maalien ja syöttöjen videot
+  load-season.ts      kauden tilastot
+  load-news.ts        uutiset
+  sort-table.ts       taulukon järjestäminen
+tests/                yksikkötestit
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Huomio
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Projekti ei ole NHL:n virallinen palvelu. Tiedot, videot ja logot ovat NHL:n.
