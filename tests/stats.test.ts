@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildTableRows, type NightPlayer } from "../src/nhl/stats";
 
 const hintz: NightPlayer = {
+  playerId: 1,
   name: "Roope Hintz",
   lastName: "Hintz",
   team: "DAL",
@@ -28,6 +29,7 @@ const hintz: NightPlayer = {
 };
 
 const goalie: NightPlayer = {
+  playerId: 2,
   name: "Esimerkki Maalivahti",
   lastName: "Maalivahti",
   team: "DAL",

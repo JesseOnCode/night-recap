@@ -1,6 +1,7 @@
 const dash = "–";
 
 export type NightPlayer = {
+  playerId: number;
   name: string;
   lastName: string;
   team: string;
@@ -27,6 +28,7 @@ export type NightPlayer = {
 };
 
 export type TableRow = {
+  playerId: number;
   player: string;
   game: string;
   goals: string;
@@ -86,6 +88,7 @@ export function buildTableRows(players: NightPlayer[]): TableRow[] {
     const goalie = player.position === "G";
 
     return {
+      playerId: player.playerId,
       player: `${player.name}, ${player.team}`,
       game: player.game,
       goals: goalie ? dash : String(player.goals),
