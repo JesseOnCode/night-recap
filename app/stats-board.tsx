@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { GoalieRow, SkaterRow } from "@/src/nhl/season";
 import { columnValue, nextSort, sortByColumn, type SortState } from "@/src/nhl/sort-table";
 import { ColumnLegend } from "./column-legend";
@@ -57,7 +57,10 @@ function StatsTable<T extends { playerId: number; player: string; team: string }
 
   return (
     <div className="table-scroll">
-      <table className="stats">
+      <table
+        className="stats"
+        style={{ "--stat-cols": Math.ceil((columns.length - 1) / 2) } as CSSProperties}
+      >
         <thead>
           <tr>
             {columns.map((column) => (
@@ -83,7 +86,10 @@ function StatsTable<T extends { playerId: number; player: string; team: string }
                       {player.player}
                     </span>
                   ) : (
-                    String(player[column.key])
+                    <>
+                      <span className="stat-label">{column.label}</span>
+                      {String(player[column.key])}
+                    </>
                   )}
                 </td>
               ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, type CSSProperties } from "react";
 import type { TableRow } from "@/src/nhl/stats";
 import { columnValue, nextSort, sortByColumn, type SortState } from "@/src/nhl/sort-table";
 import { ColumnLegend } from "./column-legend";
@@ -271,7 +271,10 @@ function PlayerRow({
   return (
     <tr>
       {columns.map((column) => (
-        <td key={column.key}>
+        <td
+          key={column.key}
+          data-label={column.key === "player" || column.key === "game" ? undefined : column.label}
+        >
           {column.key === "player" ? (
             <span className="player-name">
               <TeamLogo team={player.team} />
@@ -341,7 +344,7 @@ function NightTable({
 
   return (
     <div className="table-scroll night">
-      <table>
+      <table style={{ "--stat-cols": Math.ceil((columns.length - 2) / 2) } as CSSProperties}>
         <thead>
           <tr>
             {columns.map((column) => (

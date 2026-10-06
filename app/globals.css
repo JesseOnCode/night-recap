@@ -17,7 +17,7 @@ html {
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -89,6 +89,7 @@ a {
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .site-logo-swoosh {
@@ -970,4 +971,254 @@ img.logo-on-dark,
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.stat-label {
+  display: none;
+}
+
+@media (max-width: 64rem) {
+  table.stats,
+  .night table,
+  table.stats thead,
+  .night table thead,
+  table.stats tbody,
+  .night table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  table.stats thead tr,
+  .night table thead tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 0.1rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  table.stats thead tr::before,
+  .night table thead tr::before {
+    content: "Järjestä";
+    margin-right: 0.45rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .stats th,
+  .night th,
+  .stats th:first-child,
+  .night th:first-child,
+  .night th:nth-child(2),
+  .stats th:nth-child(n + 2),
+  .night th:nth-child(n + 3) {
+    width: auto;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .sort-button,
+  .stats th:nth-child(n + 2) .sort-button,
+  .night th:nth-child(n + 3) .sort-button {
+    display: inline-flex;
+    gap: 0.15rem;
+    width: auto;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.78rem;
+  }
+
+  .sort-arrow,
+  .stats th:nth-child(n + 2) .sort-arrow,
+  .night th:nth-child(n + 3) .sort-arrow {
+    width: auto;
+    font-size: 0.7rem;
+  }
+
+  .sort-arrow.is-reserved {
+    display: none;
+  }
+
+  table.stats tbody tr,
+  .night table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(var(--stat-cols, 5), minmax(0, 1fr));
+    row-gap: 0.45rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stats td,
+  .night td,
+  .stats td:first-child,
+  .night td:first-child,
+  .night td:nth-child(2),
+  .stats td:nth-child(n + 2),
+  .night td:nth-child(n + 3) {
+    width: auto;
+    padding: 0;
+    border-bottom: 0;
+    font-size: 0.88rem;
+    text-align: center;
+  }
+
+  .stats td:first-child,
+  .night td:first-child,
+  .night td:nth-child(2) {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .night td:nth-child(2) {
+    padding-left: calc(3.25rem + 0.4rem);
+  }
+
+  .night td:nth-child(2) .matchup {
+    justify-content: flex-start;
+  }
+
+  .stat-label,
+  td[data-label]::before {
+    display: block;
+    margin-bottom: 0.1rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  td[data-label]::before {
+    content: attr(data-label);
+  }
+
+  .table-scroll tbody tr:hover td {
+    background: transparent;
+  }
+
+  .night table tbody tr.clip-row {
+    display: block;
+    padding: 0 0 1rem;
+  }
+
+  .night tr.clip-row td {
+    display: block;
+    padding: 0;
+  }
+
+  .clip-row .clips {
+    position: static;
+    width: 100%;
+  }
+}
+
+@media (max-width: 40rem) {
+  .site-header-inner {
+    gap: 1rem;
+    min-height: 4rem;
+    padding: 0 1rem;
+  }
+
+  .site-logo-text {
+    font-size: 1.3rem;
+  }
+
+  .site-nav {
+    gap: 0.25rem 1rem;
+  }
+
+  .site-nav a {
+    font-size: 0.92rem;
+  }
+
+  .news-ticker {
+    font-size: 0.8rem;
+  }
+
+  .news-ticker-label {
+    padding: 0 0.8rem 0 1rem;
+  }
+
+  main {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+
+  .page-head {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  h1 {
+    display: block;
+    font-size: 1.3rem;
+  }
+
+  h1 .flag-fi {
+    display: inline-block;
+    width: 1.8rem;
+    margin-left: 0.5rem;
+    vertical-align: -0.15em;
+  }
+
+  .night .player-name img,
+  .night .player-name .logo-space,
+  .night .matchup img,
+  .night .matchup .logo-space,
+  .player-name img,
+  .matchup img,
+  .logo-space {
+    width: 2.75rem;
+    height: 2.1rem;
+  }
+
+  .night .player-name {
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  }
+
+  .night td:nth-child(2) {
+    padding-left: calc(2.75rem + 0.4rem);
+  }
+
+  .scorebug img,
+  .scorebug .logo-space {
+    width: 3.6rem;
+    height: 2.8rem;
+  }
+
+  .scorebug-num {
+    font-size: 2rem;
+  }
+
+  .site-footer-inner {
+    padding: 1.5rem 1rem 1.1rem;
+  }
+
+  .site-footer-main {
+    gap: 1.25rem;
+  }
+
+  .site-footer-meta {
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 22.5rem) {
+  .site-header-inner {
+    gap: 0.75rem;
+  }
+
+  .site-logo-text {
+    font-size: 1.12rem;
+  }
+
+  .site-nav {
+    gap: 0.25rem 0.75rem;
+  }
+
+  .site-nav a {
+    font-size: 0.85rem;
+  }
 }
