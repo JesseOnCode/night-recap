@@ -24,11 +24,17 @@ export type NightPlayer = {
   saves: number | null;
   savePctg: number | null;
   goalsAgainst: number | null;
+  shotsAgainst: number | null;
+  evenStrengthAgainst: string | null;
+  powerPlayAgainst: string | null;
+  shorthandedAgainst: string | null;
   decision: string | null;
 };
 
 export type TableRow = {
   playerId: number;
+  team: string;
+  goalie: boolean;
   player: string;
   game: string;
   goals: string;
@@ -48,6 +54,10 @@ export type TableRow = {
   saves: string;
   savePct: string;
   goalsAgainst: string;
+  shotsAgainst: string;
+  evenStrength: string;
+  powerPlayAgainst: string;
+  shorthandedAgainst: string;
   decision: string;
 };
 
@@ -89,6 +99,8 @@ export function buildTableRows(players: NightPlayer[]): TableRow[] {
 
     return {
       playerId: player.playerId,
+      team: player.team,
+      goalie,
       player: `${player.name}, ${player.team}`,
       game: player.game,
       goals: goalie ? dash : String(player.goals),
@@ -111,6 +123,10 @@ export function buildTableRows(players: NightPlayer[]): TableRow[] {
           ? formatSavePct(player.savePctg)
           : dash,
       goalsAgainst: goalie ? String(player.goalsAgainst) : dash,
+      shotsAgainst: goalie ? String(player.shotsAgainst ?? 0) : dash,
+      evenStrength: goalie ? (player.evenStrengthAgainst ?? dash) : dash,
+      powerPlayAgainst: goalie ? (player.powerPlayAgainst ?? dash) : dash,
+      shorthandedAgainst: goalie ? (player.shorthandedAgainst ?? dash) : dash,
       decision: goalie && player.decision ? player.decision : dash,
     };
   });
