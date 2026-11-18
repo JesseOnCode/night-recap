@@ -21,7 +21,7 @@ export default function RootLayout({
     <html lang="fi">
       <body>
         <SiteHeader />
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="news-ticker news-ticker-skeleton" aria-hidden="true" />}>
           <NewsTicker />
         </Suspense>
         {children}

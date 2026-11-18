@@ -68,10 +68,6 @@ async function finnsByTeam(teams: string[]): Promise<Finn[]> {
     pending = pending.filter((team) => !done.has(team));
   }
 
-  if (pending.length > 0) {
-    throw new Error("rosters");
-  }
-
   return [...found.values()].flat();
 }
 

@@ -1,3 +1,5 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { mapPool, nhlJson } from "./client";
 import { loadFinns, type Finn } from "./load-finns";
 import { relevantStory, storyImage, storyPage, withinDays, type NewsCard, type StoryHit } from "./news";
@@ -14,11 +16,51 @@ type StoryRaw = {
 };
 
 const ttlMs = 20 * 60 * 1000;
+const cacheFile = path.join(process.cwd(), ".cache", "news.json");
 
 let cache: { at: number; cards: NewsCard[] } | null = null;
+let diskRead: Promise<{ at: number; cards: NewsCard[] } | null> | null = null;
+let pendingRefresh: Promise<NewsCard[]> | null = null;
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function dedupeCards(groups: NewsCard[][]): NewsCard[] {
+  const bySlug = new Map<string, NewsCard>();
+
+  for (const card of groups.flat()) {
+    const previous = bySlug.get(card.slug);
+    if (!previous || card.published > previous.published) {
+      bySlug.set(card.slug, card);
+    }
+  }
+
+  return [...bySlug.values()]
+    .sort((a, b) => b.published.localeCompare(a.published))
+    .slice(0, 40);
+}
+
+async function readDisk(): Promise<{ at: number; cards: NewsCard[] } | null> {
+  try {
+    const parsed = JSON.parse(await readFile(cacheFile, "utf8")) as {
+      at?: number;
+      cards?: NewsCard[];
+    };
+
+    if (!Array.isArray(parsed.cards) || parsed.cards.length === 0) {
+      return null;
+    }
+
+    return { at: parsed.at ?? 0, cards: parsed.cards };
+  } catch {
+    return null;
+  }
+}
+
+async function writeDisk(stored: { at: number; cards: NewsCard[] }): Promise<void> {
+  await mkdir(path.dirname(cacheFile), { recursive: true });
+  await writeFile(cacheFile, JSON.stringify(stored));
 }
 
 function toHit(raw: StoryRaw): StoryHit | null {
@@ -74,11 +116,7 @@ async function cardsFor(player: Finn): Promise<NewsCard[]> {
     });
 }
 
-export async function loadNews(): Promise<NewsCard[]> {
-  if (cache && Date.now() - cache.at < ttlMs) {
-    return cache.cards;
-  }
-
+async function refreshNews(): Promise<NewsCard[]> {
   const finns = await loadFinns();
   const groups: NewsCard[][] = [];
   let pending = finns;
@@ -101,23 +139,50 @@ export async function loadNews(): Promise<NewsCard[]> {
     pending = pending.filter((player) => !done.has(player.playerId));
   }
 
-  if (pending.length > 0) {
-    throw new Error("news");
+  const cards = dedupeCards(groups);
+
+  if (cards.length > 0) {
+    const stored = { at: Date.now(), cards };
+    cache = stored;
+    await writeDisk(stored);
+    return cards;
   }
 
-  const bySlug = new Map<string, NewsCard>();
-
-  for (const card of groups.flat()) {
-    const previous = bySlug.get(card.slug);
-    if (!previous || card.published > previous.published) {
-      bySlug.set(card.slug, card);
-    }
+  if (cache) {
+    return cache.cards;
   }
 
-  const cards = [...bySlug.values()]
-    .sort((a, b) => b.published.localeCompare(a.published))
-    .slice(0, 40);
+  diskRead ??= readDisk();
+  const stored = await diskRead;
+  return stored?.cards ?? [];
+}
 
-  cache = { at: Date.now(), cards };
-  return cards;
+export async function loadNews(): Promise<NewsCard[]> {
+  const now = Date.now();
+
+  if (cache && now - cache.at < ttlMs) {
+    return cache.cards;
+  }
+
+  diskRead ??= readDisk();
+  const stored = await diskRead;
+
+  if (stored && now - stored.at < ttlMs) {
+    cache = stored;
+    return stored.cards;
+  }
+
+  if (stored && stored.cards.length > 0) {
+    cache = stored;
+    pendingRefresh ??= refreshNews().finally(() => {
+      pendingRefresh = null;
+    });
+    return stored.cards;
+  }
+
+  pendingRefresh ??= refreshNews().finally(() => {
+    pendingRefresh = null;
+  });
+
+  return pendingRefresh;
 }
