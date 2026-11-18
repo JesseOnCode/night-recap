@@ -89,12 +89,12 @@ export async function loadFinns(): Promise<Finn[]> {
   ];
 
   if (teams.length === 0) {
-    throw new Error("standings");
+    return cache?.finns ?? [];
   }
 
   const finns = await finnsByTeam(teams);
   if (finns.length === 0) {
-    throw new Error("finns");
+    return cache?.finns ?? [];
   }
 
   cache = { at: Date.now(), finns };

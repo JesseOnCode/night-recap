@@ -19,8 +19,36 @@ const ttlMs = 20 * 60 * 1000;
 const cacheFile = path.join(process.cwd(), ".cache", "news.json");
 
 let cache: { at: number; cards: NewsCard[] } | null = null;
-let diskRead: Promise<{ at: number; cards: NewsCard[] } | null> | null = null;
 let pendingRefresh: Promise<NewsCard[]> | null = null;
+
+async function cachedCards(): Promise<NewsCard[]> {
+  if (cache?.cards.length) {
+    return cache.cards;
+  }
+
+  const stored = await readDisk();
+  if (stored?.cards.length) {
+    cache = stored;
+    return stored.cards;
+  }
+
+  return [];
+}
+
+function scheduleRefresh(): void {
+  if (pendingRefresh) {
+    return;
+  }
+
+  pendingRefresh = refreshNews()
+    .catch(async (error) => {
+      console.error(error);
+      return cachedCards();
+    })
+    .finally(() => {
+      pendingRefresh = null;
+    });
+}
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -118,6 +146,10 @@ async function cardsFor(player: Finn): Promise<NewsCard[]> {
 
 async function refreshNews(): Promise<NewsCard[]> {
   const finns = await loadFinns();
+  if (finns.length === 0) {
+    return cachedCards();
+  }
+
   const groups: NewsCard[][] = [];
   let pending = finns;
 
@@ -148,13 +180,7 @@ async function refreshNews(): Promise<NewsCard[]> {
     return cards;
   }
 
-  if (cache) {
-    return cache.cards;
-  }
-
-  diskRead ??= readDisk();
-  const stored = await diskRead;
-  return stored?.cards ?? [];
+  return cachedCards();
 }
 
 export async function loadNews(): Promise<NewsCard[]> {
@@ -164,8 +190,7 @@ export async function loadNews(): Promise<NewsCard[]> {
     return cache.cards;
   }
 
-  diskRead ??= readDisk();
-  const stored = await diskRead;
+  const stored = (await readDisk()) ?? cache;
 
   if (stored && now - stored.at < ttlMs) {
     cache = stored;
@@ -174,15 +199,10 @@ export async function loadNews(): Promise<NewsCard[]> {
 
   if (stored && stored.cards.length > 0) {
     cache = stored;
-    pendingRefresh ??= refreshNews().finally(() => {
-      pendingRefresh = null;
-    });
+    scheduleRefresh();
     return stored.cards;
   }
 
-  pendingRefresh ??= refreshNews().finally(() => {
-    pendingRefresh = null;
-  });
-
-  return pendingRefresh;
+  scheduleRefresh();
+  return pendingRefresh ?? cachedCards();
 }

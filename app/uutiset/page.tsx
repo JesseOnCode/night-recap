@@ -15,14 +15,7 @@ function formatDate(value: string): string {
 }
 
 export default async function NewsPage() {
-  let cards: Awaited<ReturnType<typeof loadNews>> = [];
-  let failed = false;
-
-  try {
-    cards = await loadNews();
-  } catch {
-    failed = true;
-  }
+  const cards = await loadNews();
 
   return (
     <main>
@@ -30,8 +23,7 @@ export default async function NewsPage() {
         <h1>Uutiset</h1>
         <p className="page-lead">Suomalaispelaajien NHL-uutiset.</p>
       </header>
-      {failed ? <p className="error">Uutisia ei saatu haettua.</p> : null}
-      {!failed && cards.length === 0 ? <p className="slate-date">Ei uutisia.</p> : null}
+      {cards.length === 0 ? <p className="slate-date">Ei uutisia juuri nyt.</p> : null}
       <div className="news-list">
         {cards.map((card) => (
           <article className="news-card" key={card.slug}>
